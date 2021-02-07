@@ -13,7 +13,7 @@ type ISatelliteController interface {
 
 //ISatelliteService .
 type ISatelliteService interface {
-	TopSecret(*[]model.Satellite) *model.DTOResult
+	GetTransmitter(*[]model.Satellite) (*model.DTOResult, error)
 }
 
 // //ISatelliteRepository .

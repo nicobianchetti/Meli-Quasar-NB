@@ -2,18 +2,19 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/interfaces"
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/model"
 )
 
-type satelliteController struct{}
+type satelliteController struct {
+	service interfaces.ISatelliteService
+}
 
 //NewSatelliteController .
-func NewSatelliteController() interfaces.ISatelliteController {
-	return &satelliteController{}
+func NewSatelliteController(service interfaces.ISatelliteService) interfaces.ISatelliteController {
+	return &satelliteController{service}
 }
 
 func (s *satelliteController) TopSecret(w http.ResponseWriter, r *http.Request) {
@@ -25,8 +26,22 @@ func (s *satelliteController) TopSecret(w http.ResponseWriter, r *http.Request) 
 	defer r.Body.Close()
 
 	if err != nil {
-		fmt.Println("\n error decoding:", err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
-	fmt.Println(satellitesInput)
+	result, err := s.service.GetTransmitter(&satellitesInput.Satellites)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, result)
+}
+
+func respondWithJSON(w http.ResponseWriter, status int, payload interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(payload)
 }

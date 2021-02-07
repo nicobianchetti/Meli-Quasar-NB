@@ -6,3 +6,8 @@ type Satellite struct {
 	Distance float64  `json:"distance"`
 	Message  []string `json:"message"`
 }
+
+//DTORequestSatellites .
+type DTORequestSatellites struct {
+	Satellites []Satellite `json:"satellites"`
+}

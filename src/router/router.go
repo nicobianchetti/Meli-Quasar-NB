@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/controller"
+	"github.com/nicobianchetti/Meli-Quasar-NB/src/service"
 )
 
 const (
@@ -35,8 +36,8 @@ func SetupRoutesSatellite(httpRouter IRouter) {
 		Conexión entidad Mutant
 	*/
 	// rMutant := repository.NewMutantRepository(db)
-	// sMutant := service.NewMutantService(rMutant)
-	cSatellite := controller.NewSatelliteController()
+	sSatellite := service.NewSatelliteService()
+	cSatellite := controller.NewSatelliteController(sSatellite)
 
 	NewSatelliteRouter(PATHPREFIX, cSatellite, httpRouter)
 
