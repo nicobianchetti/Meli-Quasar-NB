@@ -1,5 +1,3 @@
-FROM golang 
-
 # Base image for building the go project
 FROM golang:1.14-alpine AS build
 
