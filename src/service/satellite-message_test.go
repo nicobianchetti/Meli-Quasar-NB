@@ -50,9 +50,30 @@ func TestMessages(t *testing.T) {
 
 		{
 			name:     "Case 5.1: Desfasaje 2 - Mínimo referencia sin strings ",
-			messages: [][]string{{"", "es", "", ""}, {"", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "este", "", "un", "mensaje"}},
+			messages: [][]string{{"", "", "es", "", ""}, {"", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "este", "", "un", "mensaje"}},
 			result:   "este es un mensaje",
 			err:      nil,
+		},
+
+		{
+			name:     "Case 5.2: Desfasaje 2 - Mínimo sin strings , no reference ",
+			messages: [][]string{{"si", "", "es", "", ""}, {"", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "este", "", "un", "mensaje"}},
+			result:   "si este es un mensaje",
+			err:      nil,
+		},
+
+		{
+			name:     "Case 5.3: Desfasaje 2 - Mínimo sin strings , no reference ",
+			messages: [][]string{{"", "si", "", "es", "", ""}, {"", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "este", "", "un", "mensaje"}},
+			result:   "si este es un mensaje",
+			err:      nil,
+		},
+
+		{
+			name:     "Case 5.4: Desfasaje 2 - Indeterminación por no tener límites (L/R) ",
+			messages: [][]string{{"", "si", "", "es", "", ""}, {"", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "este", "", "un", "mensaje", "", ""}},
+			result:   "",
+			err:      errors.New("Error mensaje. Superposición de cadenas"),
 		},
 
 		{
@@ -67,6 +88,27 @@ func TestMessages(t *testing.T) {
 			messages: [][]string{{"", "", "", "", "es", "un"}, {"este", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "mensaje"}},
 			result:   "",
 			err:      errors.New("Error mensaje. Falta información"),
+		},
+
+		{
+			name:     "Case 7: Desfasaje 5 - Minimo no reference  ",
+			messages: [][]string{{"este", "", "", "", "es", "un"}, {"", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "mensaje"}},
+			result:   "",
+			err:      errors.New("Error mensaje. Falta información"),
+		},
+
+		{
+			name:     "Case 8: Desfasaje 6 - Doble referencia array menor ",
+			messages: [][]string{{"este", "es", "un", ""}, {"", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "mensaje"}},
+			result:   "este es un mensaje",
+			err:      nil,
+		},
+
+		{
+			name:     "Case 9: Minimo desfasado",
+			messages: [][]string{{"", "", "este", "es", "un", "mensaje"}, {"", "este", "", "un", "mensaje"}, {"", "", "es", "", "mensaje"}},
+			result:   "este es un mensaje",
+			err:      nil,
 		},
 	}
 
