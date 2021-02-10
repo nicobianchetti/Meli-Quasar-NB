@@ -61,8 +61,10 @@ func (cache *redisCache) Get(key string) (*model.DTORequestSatellites, error) {
 
 	val, err := client.Get(key).Result()
 
-	if err != nil {
-		fmt.Println(err)
+	//Si estructura viene vacía no lo considero un error,devuelvo nil
+	if err == redis.Nil {
+		return nil, nil
+	} else if err != nil {
 		return nil, err
 	}
 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"reflect"
 
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/interfaces"
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/model"
@@ -99,20 +100,32 @@ func (s *satelliteService) RegisterKey(key string, satellite *model.Satellite) e
 	}
 
 	//Si ya había una estructura de satélite guardada para el usuario, reviso para sobreescribir o agregar satélite nuevo
-	if len(satellites.Satellites) > 0 {
+	if satellites != nil {
 		var isExistSatellite bool = false
+		var indexExist int
+		var updateData bool = false
+
 		//Verifico, si ya existe , sobreescribo los datos y reemplazo la key
-		for _, v := range satellites.Satellites {
+		for i, v := range satellites.Satellites {
 			if v.Name == satellite.Name {
-				v.Distance = satellite.Distance
-				v.Message = satellite.Message
 				isExistSatellite = true
+				if !reflect.DeepEqual(v.Message, satellite.Message) || v.Distance != satellite.Distance {
+					updateData = true
+				}
+				indexExist = i
+				break
 			}
 		}
 
 		//Si satélite nuevo no existía , apependeo a estructura
 		if !isExistSatellite {
 			satellites.Satellites = append(satellites.Satellites, *satellite)
+		} else {
+			//Si ya existe, y además vino un dato distino,lo modifico con los datos nuevos
+			if updateData {
+				satellites.Satellites[indexExist].Distance = satellite.Distance
+				satellites.Satellites[indexExist].Message = satellite.Message
+			}
 		}
 
 		err := s.cache.Delete(key)
@@ -131,12 +144,11 @@ func (s *satelliteService) RegisterKey(key string, satellite *model.Satellite) e
 	}
 
 	//Si la estructura no existe , agrego a la base estructura nueva asociada a key(user)
-	//!!REVISAR SI ES POSIBLE APPENDEAR SOBRE EL PUNTERO A STRUC QUE ME DEVUELVE EL PRIMER GET
-	var newSatellites model.DTORequestSatellites
+	newSatellites := model.DTORequestSatellites{}
 
 	newSatellites.Satellites = append(newSatellites.Satellites, *satellite)
 
-	err = s.cache.Set(key, satellites)
+	err = s.cache.Set(key, &newSatellites)
 
 	if err != nil {
 		return err
@@ -151,6 +163,11 @@ func (s *satelliteService) GetSatellites(key string) (*model.DTORequestSatellite
 	satellites, err := s.cache.Get(key)
 
 	if err != nil {
+		return nil, err
+	}
+
+	if satellites == nil {
+		err := errors.New("No hay información suficiente")
 		return nil, err
 	}
 
