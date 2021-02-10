@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"github.com/nicobianchetti/Meli-Quasar-NB/src/cache"
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/controller"
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/service"
 )
@@ -33,10 +34,11 @@ func SetupRoutesSatellite(httpRouter IRouter) {
 	// db := database.DB()
 
 	/*
-		Conexión entidad Mutant
+		Conexión entidad
 	*/
 	// rMutant := repository.NewMutantRepository(db)
-	sSatellite := service.NewSatelliteService()
+	cacheSatellite := cache.NewRedisCache("localhost:6379", 1, 500)
+	sSatellite := service.NewSatelliteService(cacheSatellite)
 	cSatellite := controller.NewSatelliteController(sSatellite)
 
 	NewSatelliteRouter(PATHPREFIX, cSatellite, httpRouter)

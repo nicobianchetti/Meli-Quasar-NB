@@ -11,10 +11,22 @@ const (
 	ySATO      = 100.0
 )
 
+func location(location chan resultLocation, distances []model.DataDistances) {
+
+	defer close(location)
+
+	// time.Sleep(4 * time.Second)
+
+	x, y := getLocation(distances...)
+
+	location <- resultLocation{x: x, y: y}
+
+}
+
 //GetLocation .
 // input: distancia al emisor tal cual se recibe en cada satélite
 // output: las coordenadas ‘x’ e ‘y’ del emisor del mensaje
-func GetLocation(distances ...model.DataDistances) (x, y float64) {
+func getLocation(distances ...model.DataDistances) (x, y float64) {
 
 	var c1, c2, c3 model.Cordinate
 

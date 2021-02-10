@@ -114,7 +114,7 @@ func TestMessages(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			result, err := GetMessage(test.messages...)
+			result, err := getMessage(test.messages...)
 
 			if result != test.result {
 				t.Error("Retorna:", result, ",y el valor correcto es:", test.result)

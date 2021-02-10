@@ -9,10 +9,20 @@ type messagesSolve struct {
 	message [][]string
 }
 
+func message(message chan resultMessage, messages [][]string) {
+
+	defer close(message)
+
+	messageResult, err := getMessage(messages...)
+
+	message <- resultMessage{message: messageResult, err: err}
+
+}
+
 // GetMessage .
 // input: el mensaje tal cual es recibido en cada satélite
 // output: el mensaje tal cual lo genera el emisor del mensaje
-func GetMessage(messages ...[]string) (string, error) {
+func getMessage(messages ...[]string) (string, error) {
 	// lenMessage := make([]int, 3)
 	lenReference := len(messages[0]) //tomo como referencia el primer elemento para evaluar si todos los mensajes traen la misma cantida de strings
 	var isPhaseShift bool = false

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/interfaces"
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/model"
 )
@@ -21,32 +22,14 @@ func NewSatelliteController(service interfaces.ISatelliteService) interfaces.ISa
 func (s *satelliteController) TopSecret(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
+	defer r.Body.Close()
+
 	var satellitesInput model.DTORequestSatellites
 	err := decoder.Decode(&satellitesInput)
-
-	defer r.Body.Close()
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
-	}
-
-	controlSatellite := make(map[string]int) //controla que esten llegando los 3 satélites requeridos
-
-	for _, v := range satellitesInput.Satellites {
-		controlSatellite[v.Name]++
-	}
-
-	sat1 := "kenobi"
-	sat2 := "skywalker"
-	sat3 := "sato"
-
-	for i, v := range controlSatellite {
-		if v != 1 || (i != sat1 && i != sat2 && i != sat3) {
-			err := errors.New("Error en los satélites ingresados")
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
 	}
 
 	result, err := s.service.GetTransmitter(&satellitesInput.Satellites)
@@ -59,8 +42,103 @@ func (s *satelliteController) TopSecret(w http.ResponseWriter, r *http.Request) 
 	respondWithJSON(w, http.StatusOK, result)
 }
 
+func (s *satelliteController) TopSecretSplit(w http.ResponseWriter, r *http.Request) {
+	nameSatellite := mux.Vars(r)["id"]
+
+	if nameSatellite != "kenobi" && nameSatellite != "skywalker" && nameSatellite != "sato" {
+		err := errors.New("Error. Nombre de satélite incorrecto")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	user := r.Header.Get("user")
+
+	if user == "" {
+		err := errors.New("Error. Ingrese usuario")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+
+	defer r.Body.Close()
+
+	var satelliteInput model.Satellite
+	err := decoder.Decode(&satelliteInput)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if satelliteInput.Distance == 0 {
+		err := errors.New("Error. Ingrese distancia")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	satelliteInput.Name = nameSatellite
+
+	// fmt.Println(satelliteInput)
+
+	err = s.service.RegisterKey(user, &satelliteInput)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, nil)
+
+}
+
+func (s *satelliteController) TopSecretSplitGet(w http.ResponseWriter, r *http.Request) {
+	user := r.Header.Get("user")
+
+	if user == "" {
+		err := errors.New("Error. Ingrese usuario")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	satellites, err := s.service.GetSatellites(user)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	result, err := s.service.GetTransmitter(&satellites.Satellites)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	//Limpio set de datos ingresados para ese usuario
+	err = s.service.DeleteKey(user)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, result)
+
+}
+
 func respondWithJSON(w http.ResponseWriter, status int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(payload)
+}
+
+// GetIP gets a requests IP address by reading off the forwarded-for
+// header (for proxies) and falls back to use the remote address.
+func GetIP(r *http.Request) string {
+	forwarded := r.Header.Get("X-FORWARDED-FOR")
+	if forwarded != "" {
+		return forwarded
+	}
+	return r.RemoteAddr
 }

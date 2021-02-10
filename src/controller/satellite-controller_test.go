@@ -27,6 +27,24 @@ func (m *mockSatelliteService) GetTransmitter(*[]model.Satellite) (*model.DTORes
 	return result.(*model.DTOResult), args.Error(1)
 }
 
+func (m *mockSatelliteService) RegisterKey(string, *model.Satellite) error {
+	//Stub para devolver argumentos
+	args := m.Called()
+
+	//Devolución del primer argumento que recibe
+	// result := args.Get(0)
+
+	return args.Error(1)
+}
+
+func (m *mockSatelliteService) GetSatellites(string) (*model.DTORequestSatellites, error) {
+	return nil, nil
+}
+
+func (m *mockSatelliteService) DeleteKey(string) error {
+	return nil
+}
+
 func TestTopSecret(t *testing.T) {
 	//Mockeo Service para pasarlo por inyección de dependencia al controller
 	mockService := new(mockSatelliteService)
