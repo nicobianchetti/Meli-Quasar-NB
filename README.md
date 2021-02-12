@@ -78,7 +78,7 @@ _Response:_
 }
 ```
 
-Imagen Ejemplo Request Nivel 1
+![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Ejemplo%20Request%20Nivel%201.PNG)
 
 ### Ejemplo de Request para nivel 3:
 
@@ -131,8 +131,8 @@ api-key : una-api-key-muy-segura
 user : nicob
 ```
 
-Imagen ejemplo Request nivel 3.1
-Imagen ejemplo Request nivel 3.2
+![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Ejemplo%20Request%20nivel%203.1.PNG)
+![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Ejemplo%20Request%20Nivel%203.2.PNG)
 
 ### Construido con 🛠️
 
@@ -154,9 +154,10 @@ go test -v
 
 _Para el despliegue de la aplicación adquirí un droplet en Digital Ocean, mediante el cual haciendo uso de una imagen de Ubuntu 20.04 lts (en el cual se instaló Docker y Docker-Compose) se realizó un despliegue multi-container haciendo uso de docker-compose. El mismo levanta una instancia de Redis (sistema de almacenamiento utilizado para el nivel 3 ) , 5 réplicas de la API (expuesta en puerto:5000) y una instancia de Nginx que es utilizada como Proxy reverso con el fin de permitir Balanceo de Carga .
 
-Imagen Despliegue 
+![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Vista%20Despliegue.PNG)
+![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Imagen%20Despliegue%202.PNG)
 
-Imagen Despliegue 2
+
 
 
 
