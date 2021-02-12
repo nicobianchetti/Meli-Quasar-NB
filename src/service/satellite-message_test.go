@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"reflect"
 	"testing"
 )
@@ -24,14 +23,14 @@ func TestMessages(t *testing.T) {
 			name:     "Case 2: Información incompleta",
 			messages: [][]string{{"este", "", "", "mensaje", ""}, {"", "es", "", "", "secreto"}, {"este", "", "", "", ""}},
 			result:   "",
-			err:      errors.New("Error mensaje. Falta información"),
+			err:      errorInfo,
 		},
 
 		{
 			name:     "Case 3: Superposición de cadenas",
 			messages: [][]string{{"este", "", "", "mensaje", ""}, {"", "es", "uno", "", "secreto"}, {"este", "", "un", "", ""}},
 			result:   "",
-			err:      errors.New("Error mensaje. Superposición de cadenas"),
+			err:      errorCadena,
 		},
 
 		{
@@ -56,24 +55,10 @@ func TestMessages(t *testing.T) {
 		},
 
 		{
-			name:     "Case 5.2: Desfasaje 2 - Mínimo sin strings , no reference ",
-			messages: [][]string{{"si", "", "es", "", ""}, {"", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "este", "", "un", "mensaje"}},
-			result:   "si este es un mensaje",
-			err:      nil,
-		},
-
-		{
-			name:     "Case 5.3: Desfasaje 2 - Mínimo sin strings , no reference ",
-			messages: [][]string{{"", "si", "", "es", "", ""}, {"", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "este", "", "un", "mensaje"}},
-			result:   "si este es un mensaje",
-			err:      nil,
-		},
-
-		{
-			name:     "Case 5.4: Desfasaje 2 - Indeterminación por no tener límites (L/R) ",
+			name:     "Case 5.2: Desfasaje 2 - Indeterminación por no tener límites (L/R) ",
 			messages: [][]string{{"", "si", "", "es", "", ""}, {"", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "este", "", "un", "mensaje", "", ""}},
 			result:   "",
-			err:      errors.New("Error mensaje. Superposición de cadenas"),
+			err:      errorCadena,
 		},
 
 		{
@@ -84,17 +69,17 @@ func TestMessages(t *testing.T) {
 		},
 
 		{
-			name:     "Case 6: Desfasaje 4 - Indeterminado  ",
+			name:     "Case 6: Desfasaje 4 - Falta información  ",
 			messages: [][]string{{"", "", "", "", "es", "un"}, {"este", "", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "mensaje"}},
 			result:   "",
-			err:      errors.New("Error mensaje. Falta información"),
+			err:      errorCadena,
 		},
 
 		{
-			name:     "Case 7: Desfasaje 5 - Minimo no reference  ",
+			name:     "Case 7: Desfasaje 5  ",
 			messages: [][]string{{"este", "", "", "", "es", "un"}, {"", "", ""}, {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "mensaje"}},
 			result:   "",
-			err:      errors.New("Error mensaje. Falta información"),
+			err:      errorCadena,
 		},
 
 		{
@@ -105,8 +90,15 @@ func TestMessages(t *testing.T) {
 		},
 
 		{
-			name:     "Case 9: Minimo desfasado",
+			name:     "Case 9: Mínimo desfasado",
 			messages: [][]string{{"", "", "este", "es", "un", "mensaje"}, {"", "este", "", "un", "mensaje"}, {"", "", "es", "", "mensaje"}},
+			result:   "este es un mensaje",
+			err:      nil,
+		},
+
+		{
+			name:     "Case 10: Desfasaje Left/Rigth",
+			messages: [][]string{{"", "", "", "es", "", "mensaje", "", ""}, {"este", "es", "un", "mensaje"}, {"", "", "es", "", "mensaje"}},
 			result:   "este es un mensaje",
 			err:      nil,
 		},
