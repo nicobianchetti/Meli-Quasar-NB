@@ -156,6 +156,7 @@ _Para el despliegue de la aplicación adquirí un droplet en Digital Ocean, medi
 
 Imagen Despliegue 
 
+Imagen Despliegue 2
 
 
 
