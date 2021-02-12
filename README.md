@@ -119,6 +119,9 @@ api-key : una-api-key-muy-segura
 user : nicob
 ```
 
+![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Ejemplo%20Request%20nivel%203.1.PNG)
+![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Ejemplo%20Request%20Nivel%203.2.PNG)
+
 GET /quasar/topsecret_split/:_
 
 ```
@@ -131,8 +134,7 @@ api-key : una-api-key-muy-segura
 user : nicob
 ```
 
-![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Ejemplo%20Request%20nivel%203.1.PNG)
-![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Ejemplo%20Request%20Nivel%203.2.PNG)
+
 
 ### Construido con 🛠️
 
@@ -152,12 +154,19 @@ go test -v
 
 ### Despliegue 📦
 
-_Para el despliegue de la aplicación adquirí un droplet en Digital Ocean, mediante el cual haciendo uso de una imagen de Ubuntu 20.04 lts (en el cual se instaló Docker y Docker-Compose) se realizó un despliegue multi-container haciendo uso de docker-compose. El mismo levanta una instancia de Redis (sistema de almacenamiento utilizado para el nivel 3 ) , 5 réplicas de la API (expuesta en puerto:5000) y una instancia de Nginx que es utilizada como Proxy reverso con el fin de permitir Balanceo de Carga .
+_Para el despliegue de la aplicación adquirí un droplet en Digital Ocean (plan básico), mediante el cual haciendo uso de una imagen de Ubuntu 20.04 lts (en el cual se instaló Docker y Docker-Compose) se realizó un despliegue multi-container haciendo uso de docker-compose. El mismo levanta una instancia de Redis (sistema de almacenamiento utilizado para el nivel 3 ) , 5 réplicas de la API (expuesta en puerto:5000) y una instancia de Nginx que es utilizada como Proxy reverso con el fin de permitir Balanceo de Carga .
+
+(Por favor, limitar pruebas de carga a la Api para evitar cobros mayores).
 
 ![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Vista%20Despliegue.PNG)
 ![Screenshot](https://github.com/nicobianchetti/Meli-Quasar-NB/blob/main/img/Imagen%20Despliegue%202.PNG)
 
+### Consideraciones algoritmos 📖
 
+* GetLocation:
+_El enunciado plantea un problema de localización de un punto en un eje coordenado , conociendo los datos de las coordenas de otros tres puntos (satélites) y sus respectivas distancias al punto desconocido. 
+La trilateración es un método matemático que usa las localizaciones conocidas de dos o más puntos de referencia, y la distancia medida entre el sujeto y cada punto de referencia. Para determinar de forma única y precisa la localización relativa de un punto en un plano bidimensional usando solo trilateración, se necesitan generalmente al menos 3 puntos de referencia. 
+Se define como regla de negocio que sea oblitorio el dato de la posición de los 3 satélites y las 3 distancias de cada uno al emisor para realizar el cálculo._
 
-
-
+ _*Fuente de método de cálculo empleado - [Trilateración](https://confluence.slac.stanford.edu/display/IEPM/TULIP+Algorithm+Alternative+Trilateration+Method) _
+ 
