@@ -100,12 +100,61 @@ _ POST /quasar/topsecret_split/{sastelite_name}:_
 
 ```
 http://144.126.217.32/quasar/topsecret_split/kenobi
-http://144.126.217.32/quasar/topsecret_split/skywalker
 http://144.126.217.32/quasar/topsecret_split/sato
+http://144.126.217.32/quasar/topsecret_split/skywalker
 ```
 
+_Body ejemplo:_
 
+```
+{
+    "distance": 100.00,
+    "message": ["este", "", "", "mensaje", ""]
+}
+```
+_Headers:_
 
+```
+api-key : una-api-key-muy-segura
+user : nicob
+```
+
+GET /quasar/topsecret_split/:_
+
+```
+http://144.126.217.32/quasar/topsecret_split/
+```
+_Headers:_
+
+```
+api-key : una-api-key-muy-segura
+user : nicob
+```
+
+Imagen ejemplo Request nivel 3.1
+Imagen ejemplo Request nivel 3.2
+
+### Construido con 🛠️
+
+_Paquetes externos utilizados para la construccitón de la API_
+
+* [gorilla/mux](https://github.com/gorilla/mux) - Para rutas http 
+* [stretchr/testify](https://github.com/stretchr/testify) - Usado para tests automáticos
+* [Redis](https://github.com/go-redis/redis) - Usado para conectarse a Redis
+
+### Ejecutando las pruebas ⚙️
+
+_Para ejecutar los test automáticos, ejecutar el siguiente comando dentro del folder que contenta archivos x_test.go :_
+
+```
+go test -v
+```
+
+### Despliegue 📦
+
+_Para el despliegue de la aplicación adquirí un droplet en Digital Ocean, mediante el cual haciendo uso de una imagen de Ubuntu 20.04 lts (en el cual se instaló Docker y Docker-Compose) se realizó un despliegue multi-container haciendo uso de docker-compose. El mismo levanta una instancia de Redis (sistema de almacenamiento utilizado para el nivel 3 ) , 5 réplicas de la API (expuesta en puerto:5000) y una instancia de Nginx que es utilizada como Proxy reverso con el fin de permitir Balanceo de Carga .
+
+Imagen Despliegue 
 
 
 
