@@ -1,13 +1,23 @@
 version: '3.3'
 
 services: 
+    redis:
+        image: redis:latest
+        ports: 
+            - "6379:6379"
+        networks: 
+            - app-network 
     api:
         build: "."
+        depends_on: 
+            - redis
         ports:
             - "5000"
+        environment:
+            REDISHOST: redis:6379
         restart: "always"
         networks: 
-            - "api.network"
+            - app-network
         deploy:
             replicas: 5
     nginx:
@@ -19,6 +29,9 @@ services:
         ports: 
             - "80:80"
         networks: 
-            - "api.network"
+            - app-network
+
+#Docker Networks
 networks: 
-    api.network:
+    app-network:
+        driver: bridge
