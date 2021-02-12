@@ -1,6 +1,7 @@
 package service
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/model"
@@ -11,6 +12,7 @@ func TestTrilateration(t *testing.T) {
 		name       string
 		c1, c2, c3 model.Cordinate
 		x, y       float64
+		err        error
 	}{
 		{
 			name: "Case 1: Ejemplo enunciado",
@@ -19,6 +21,7 @@ func TestTrilateration(t *testing.T) {
 			c3:   model.Cordinate{X: 500, Y: 100, D: 142.7},
 			x:    -487.2859125,
 			y:    1557.014225,
+			err:  nil,
 		},
 		{
 			name: "Case 2: 3 satélites - 2 distancias",
@@ -27,12 +30,13 @@ func TestTrilateration(t *testing.T) {
 			c3:   model.Cordinate{X: 500, Y: 100, D: 0},
 			x:    -500.01296875,
 			y:    1633.3765625,
+			err:  nil,
 		},
 	}
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			x, y := Trilateration(test.c1, test.c2, test.c3)
+			x, y, err := Trilateration(test.c1, test.c2, test.c3)
 
 			if x != test.x {
 				t.Error("Retorna valor en x:", x, ",y el valor correcto es:", test.x)
@@ -40,6 +44,10 @@ func TestTrilateration(t *testing.T) {
 
 			if y != test.y {
 				t.Error("Retorna valor en x:", y, ",y el valor correcto es:", test.y)
+			}
+
+			if !reflect.DeepEqual(err, test.err) {
+				t.Error("Retorna error:", err, ",y el valor correcto es:", test.err)
 			}
 		})
 	}

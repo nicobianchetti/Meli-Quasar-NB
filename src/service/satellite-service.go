@@ -8,8 +8,21 @@ import (
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/model"
 )
 
+const (
+	sat1    = "kenobi"
+	sat2    = "skywalker"
+	sat3    = "sato"
+	cantSat = 3
+)
+
+var (
+	errorSatelliteInpunt  = errors.New("Error en satélites ingresados")
+	errorInfoInsuficiente = errors.New("No hay información suficiente")
+)
+
 type resultLocation struct {
 	x, y float64
+	err  error
 }
 
 type resultMessage struct {
@@ -28,21 +41,28 @@ func NewSatelliteService(cache interfaces.ISatelliteCache) interfaces.ISatellite
 
 func (s *satelliteService) GetTransmitter(satellite *[]model.Satellite) (*model.DTOResult, error) {
 
-	controlSatellite := make(map[string]int) //controla que esten llegando los 3 satélites requeridos
+	//Controla que lleguen los 3 satélites
 
+	//Hashmap para controlar que de cada satéllite llegue un sólo dato
+	controlSatellite := make(map[string]int)
 	for _, v := range *satellite {
 		controlSatellite[v.Name]++
-	}
 
-	sat1 := "kenobi"
-	sat2 := "skywalker"
-	sat3 := "sato"
+		//Verificar que todas las distancias sean distintas de 0
+		if v.Distance == 0 {
+			return nil, errorSatelliteInpunt
+		}
+	}
 
 	for i, v := range controlSatellite {
 		if v != 1 || (i != sat1 && i != sat2 && i != sat3) {
-			err := errors.New("Error en satélites ingresados")
-			return nil, err
+			return nil, errorSatelliteInpunt
 		}
+	}
+
+	//Verificar que efectivamente hayan llegado los 3 satélites
+	if len(controlSatellite) != cantSat {
+		return nil, errorSatelliteInpunt
 	}
 
 	//------------------------------------------------------------------------------------------
@@ -61,16 +81,21 @@ func (s *satelliteService) GetTransmitter(satellite *[]model.Satellite) (*model.
 	go location(chanLocation, distances)
 	go message(chanMessage, messages)
 
+	var err error
+
 	//Lectura de chanel de Location
 	var result resultLocation
 	for u := range chanLocation {
-		result = resultLocation{x: u.x, y: u.y}
+		result = resultLocation{x: u.x, y: u.y, err: u.err}
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	position := model.NewPosition(result.x, result.y)
 
 	//Lectura chanel de Message
-	var err error
 	var message string
 	for m := range chanMessage {
 		message = m.message
@@ -167,8 +192,7 @@ func (s *satelliteService) GetSatellites(key string) (*model.DTORequestSatellite
 	}
 
 	if satellites == nil {
-		err := errors.New("No hay información suficiente")
-		return nil, err
+		return nil, errorInfoInsuficiente
 	}
 
 	return satellites, nil

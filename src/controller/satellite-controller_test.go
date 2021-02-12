@@ -32,7 +32,6 @@ func (m *mockSatelliteService) RegisterKey(string, *model.Satellite) error {
 	args := m.Called()
 
 	//Devolución del primer argumento que recibe
-	// result := args.Get(0)
 
 	return args.Error(1)
 }

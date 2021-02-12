@@ -14,6 +14,12 @@ type satelliteController struct {
 	service interfaces.ISatelliteService
 }
 
+var (
+	errorNombreSatellite  = errors.New("Error. Nombre de satélite incorrecto")
+	errorUsuario          = errors.New("Error. Ingrese usuario")
+	errorInfoInsuficiente = errors.New("No hay información suficiente")
+)
+
 //NewSatelliteController .
 func NewSatelliteController(service interfaces.ISatelliteService) interfaces.ISatelliteController {
 	return &satelliteController{service}
@@ -46,16 +52,14 @@ func (s *satelliteController) TopSecretSplit(w http.ResponseWriter, r *http.Requ
 	nameSatellite := mux.Vars(r)["id"]
 
 	if nameSatellite != "kenobi" && nameSatellite != "skywalker" && nameSatellite != "sato" {
-		err := errors.New("Error. Nombre de satélite incorrecto")
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, errorNombreSatellite.Error(), http.StatusNotFound)
 		return
 	}
 
 	user := r.Header.Get("user")
 
 	if user == "" {
-		err := errors.New("Error. Ingrese usuario")
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, errorUsuario.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -79,8 +83,6 @@ func (s *satelliteController) TopSecretSplit(w http.ResponseWriter, r *http.Requ
 
 	satelliteInput.Name = nameSatellite
 
-	// fmt.Println(satelliteInput)
-
 	err = s.service.RegisterKey(user, &satelliteInput)
 
 	if err != nil {
@@ -96,8 +98,7 @@ func (s *satelliteController) TopSecretSplitGet(w http.ResponseWriter, r *http.R
 	user := r.Header.Get("user")
 
 	if user == "" {
-		err := errors.New("Error. Ingrese usuario")
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, errorUsuario.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -105,6 +106,16 @@ func (s *satelliteController) TopSecretSplitGet(w http.ResponseWriter, r *http.R
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if satellites == nil {
+		http.Error(w, errorInfoInsuficiente.Error(), http.StatusNotFound)
+		return
+	}
+
+	if len(satellites.Satellites) != 3 {
+		http.Error(w, errorInfoInsuficiente.Error(), http.StatusNotFound)
 		return
 	}
 

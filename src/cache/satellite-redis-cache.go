@@ -10,30 +10,34 @@ import (
 	"github.com/nicobianchetti/Meli-Quasar-NB/src/model"
 )
 
-type redisCache struct {
+//RedisCache .
+type RedisCache struct {
 	host    string
 	db      int           // es un indice entre 0 y 15
 	expires time.Duration //tiempo de expiracion
+	pass    string
 }
 
 //NewRedisCache .
-func NewRedisCache(host string, db int, exp time.Duration) interfaces.ISatelliteCache {
-	return &redisCache{
+func NewRedisCache(host string, db int, exp time.Duration, pass string) interfaces.ISatelliteCache {
+	return &RedisCache{
 		host:    host,
 		db:      db,
 		expires: exp,
+		pass:    pass,
 	}
 }
 
-func (cache *redisCache) getClient() *redis.Client {
+func (cache *RedisCache) getClient() *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     cache.host,
-		Password: "",
+		Password: cache.pass,
 		DB:       cache.db,
 	})
 }
 
-func (cache *redisCache) Set(key string, value *model.DTORequestSatellites) error {
+//Set .
+func (cache *RedisCache) Set(key string, value *model.DTORequestSatellites) error {
 
 	client := cache.getClient()
 
@@ -56,7 +60,8 @@ func (cache *redisCache) Set(key string, value *model.DTORequestSatellites) erro
 
 }
 
-func (cache *redisCache) Get(key string) (*model.DTORequestSatellites, error) {
+//Get .
+func (cache *RedisCache) Get(key string) (*model.DTORequestSatellites, error) {
 	client := cache.getClient()
 
 	val, err := client.Get(key).Result()
@@ -79,7 +84,8 @@ func (cache *redisCache) Get(key string) (*model.DTORequestSatellites, error) {
 	return &satellite, nil
 }
 
-func (cache *redisCache) Delete(key string) error {
+//Delete .
+func (cache *RedisCache) Delete(key string) error {
 	client := cache.getClient()
 
 	err := client.Del(key).Err()

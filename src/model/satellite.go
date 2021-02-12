@@ -11,8 +11,3 @@ type Satellite struct {
 type DTORequestSatellites struct {
 	Satellites []Satellite `json:"satellites"`
 }
-
-// //DTORequestSplit .
-// type DTORequestSplit struct {
-// 	distance
-// }

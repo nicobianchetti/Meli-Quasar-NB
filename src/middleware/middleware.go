@@ -20,8 +20,8 @@ func Log(f FunctionLog) FunctionLog {
 // Authentication .
 func Authentication(f FunctionLog) FunctionLog {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("api-key")
-		if token != "un-token-muy-seguro" {
+		key := r.Header.Get("api-key")
+		if key != "una-api-key-muy-segura" {
 			//responder "ingreso no autorizado"
 			forbidden(w, r)
 			return

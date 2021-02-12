@@ -1,0 +1,639 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/nicobianchetti/Meli-Quasar-NB/src/service/satellite-location.go (100.0%)</option>
+				
+				<option value="file1">github.com/nicobianchetti/Meli-Quasar-NB/src/service/satellite-message.go (93.6%)</option>
+				
+				<option value="file2">github.com/nicobianchetti/Meli-Quasar-NB/src/service/satellite-service.go (40.3%)</option>
+				
+				<option value="file3">github.com/nicobianchetti/Meli-Quasar-NB/src/service/satellite-trilateration.go (87.5%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package service
+
+import "github.com/nicobianchetti/Meli-Quasar-NB/src/model"
+
+const (
+        xKENOBI    = -500.0
+        yKENOBI    = -200.0
+        xSKYWALKER = 100.0
+        ySKYWALKER = -100.0
+        xSATO      = 500.0
+        ySATO      = 100.0
+)
+
+func location(location chan resultLocation, distances []model.DataDistances) <span class="cov8" title="1">{
+
+        defer close(location)
+
+        x, y, err := getLocation(distances...)
+
+        location &lt;- resultLocation{x: x, y: y, err: err}
+
+}</span>
+
+//GetLocation .
+// input: distancia al emisor tal cual se recibe en cada satélite
+// output: las coordenadas ‘x’ e ‘y’ del emisor del mensaje
+func getLocation(distances ...model.DataDistances) (x, y float64, err error) <span class="cov8" title="1">{
+
+        var c1, c2, c3 model.Cordinate
+
+        for _, v := range distances </span><span class="cov8" title="1">{
+                switch v.Satellite </span>{
+                case "kenobi":<span class="cov8" title="1">
+                        c1 = model.Cordinate{X: xKENOBI, Y: yKENOBI, D: v.Distance}</span>
+                case "skywalker":<span class="cov8" title="1">
+                        c2 = model.Cordinate{X: xSKYWALKER, Y: ySKYWALKER, D: v.Distance}</span>
+                case "sato":<span class="cov8" title="1">
+                        c3 = model.Cordinate{X: xSATO, Y: ySATO, D: v.Distance}</span>
+                }
+
+        }
+
+        <span class="cov8" title="1">return Trilateration(c1, c2, c3)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package service
+
+import (
+        "errors"
+)
+
+type messagesSolve struct {
+        message [][]string
+}
+
+var (
+        errorCadena = errors.New("Error mensaje. Superposición de cadenas")
+        errorInfo   = errors.New("Error mensaje. Falta información")
+        errorIndef  = errors.New("Indefinción")
+
+        maxPhaseShift = 0
+)
+
+func message(message chan resultMessage, messages [][]string) <span class="cov8" title="1">{
+
+        defer close(message)
+
+        messageResult, err := getMessage(messages...)
+
+        message &lt;- resultMessage{message: messageResult, err: err}
+
+}</span>
+
+// GetMessage .
+// input: el mensaje tal cual es recibido en cada satélite
+// output: el mensaje tal cual lo genera el emisor del mensaje
+func getMessage(messages ...[]string) (string, error) <span class="cov8" title="1">{
+        lenReference := len(messages[0]) //tomo como referencia el primer elemento para evaluar si todos los mensajes traen la misma cantidad de strings
+        var isPhaseShift bool = false
+        min := lenReference
+
+        //Verifico las cantidades de strings que tiene cada mensaje
+        for _, v := range messages </span><span class="cov8" title="1">{
+
+                //Al menos un array ya es distinto, hay desfasaje
+                if len(v) != lenReference </span><span class="cov8" title="1">{
+                        isPhaseShift = true
+                }</span>
+
+                <span class="cov8" title="1">if len(v) &lt; min </span><span class="cov8" title="1">{
+                        min = len(v)
+                }</span>
+
+        }
+
+        <span class="cov8" title="1">if isPhaseShift </span><span class="cov8" title="1">{
+                var messagesMin [][]string
+                var msgNormalized [][]string
+
+                //Verificar cantidad de arrays con cantidad mínima de strings
+                for _, v := range messages </span><span class="cov8" title="1">{
+                        //Si el array tiene la cantidad mínima de strings, apendeo al array de MessagesMin, sino, apendeo a array para normalizar
+                        if len(v) == min </span><span class="cov8" title="1">{
+                                messagesMin = append(messagesMin, v)
+                        }</span> else<span class="cov8" title="1"> {
+                                msgNormalized = append(msgNormalized, v)
+                        }</span>
+                }
+
+                <span class="cov8" title="1">var arrayReference []string
+
+                //Si tengo mas de un array min, hago merge de ambos para luego determinar ajuste con los restantes
+                if len(messagesMin) &gt; 1 </span><span class="cov8" title="1">{
+                        result, err := mergeArrays(messagesMin, min)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return "", err
+                        }</span>
+
+                        <span class="cov8" title="1">arrayReference = result</span>
+
+                } else<span class="cov8" title="1"> {
+                        arrayReference = messagesMin[0]
+                }</span>
+
+                <span class="cov8" title="1">var arraysNormalizados [][]string
+
+                //Recorro todos los arrays a normalizar por no coincidir con el min de strings
+                for _, v := range msgNormalized </span><span class="cov8" title="1">{
+
+                        resultLeft, err := normalizedLeft(arrayReference, v)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return "", err
+                        }</span>
+
+                        <span class="cov8" title="1">if len(resultLeft) &gt; min </span><span class="cov8" title="1">{
+                                resultRigth, err := normalizedRight(min, resultLeft)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return "", err
+                                }</span>
+
+                                <span class="cov8" title="1">arraysNormalizados = append(arraysNormalizados, resultRigth)</span>
+
+                        } else<span class="cov8" title="1"> {
+                                arraysNormalizados = append(arraysNormalizados, resultLeft)
+                        }</span>
+                }
+
+                <span class="cov8" title="1">arraysNormalizados = append(arraysNormalizados, arrayReference)
+
+                return getMessageProcesed(arraysNormalizados, min)</span>
+        }
+
+        <span class="cov8" title="1">return getMessageProcesed(messages, min)</span>
+
+}
+
+func normalizedLeft(reference []string, normalized []string) ([]string, error) <span class="cov8" title="1">{
+        var indexReference int
+        var indexNormalized int
+
+        // fmt.Println("reference:", reference)
+
+        isMatching := false
+        //Recorro array con desfasaje para localizar punto que coincida con otro de array's tomado como referencia
+        for i, v := range normalized </span><span class="cov8" title="1">{
+                if v != "" </span><span class="cov8" title="1">{
+
+                        //Recorro el array tomado como referencia
+                        //si el array no es todo nil, tomo el primer string
+                        for j, n := range reference </span><span class="cov8" title="1">{
+
+                                if n == v </span><span class="cov8" title="1">{
+                                        indexReference = j
+                                        indexNormalized = i
+                                        isMatching = true
+                                        break</span>
+                                }
+
+                        }
+
+                }
+
+                <span class="cov8" title="1">if isMatching </span><span class="cov8" title="1">{
+                        break</span>
+                }
+        }
+
+        <span class="cov8" title="1">var phaseShift int
+
+        if isMatching </span><span class="cov8" title="1">{
+
+                if indexReference == indexNormalized </span><span class="cov0" title="0">{
+                        //SI los índices de coincidencias son iguales, entonces devuelve el mismo array para que sea normalizado por límite derecho
+                        return normalized, nil
+                }</span>
+
+                <span class="cov8" title="1">if indexReference &gt; indexNormalized </span><span class="cov0" title="0">{
+                        return nil, errorIndef
+                }</span>
+
+                //Determinar cuantos lugares debo correr a la izquierda el mensaje desfasado
+                <span class="cov8" title="1">phaseShift = indexNormalized - indexReference
+
+                if phaseShift &gt; maxPhaseShift </span><span class="cov8" title="1">{
+                        maxPhaseShift = phaseShift
+                }</span>
+
+                <span class="cov8" title="1">return normalized[phaseShift:], nil</span>
+        }
+
+        //Si no hubo ningún matching de referencia para ver cuantos lugares desplazar a la izquierda, desplazo hasta completar el mínimo
+        <span class="cov8" title="1">phaseShift = len(normalized) - len(reference)
+
+        if phaseShift &gt; maxPhaseShift </span><span class="cov8" title="1">{
+                maxPhaseShift = phaseShift
+        }</span>
+
+        <span class="cov8" title="1">return normalized[phaseShift:], nil</span>
+
+}
+
+func normalizedRight(min int, normalized []string) ([]string, error) <span class="cov8" title="1">{
+        //Recortar array para devolver los primeros &lt;min&gt; elementos. Si la parte recortada queda con un string no vacío, entonces hay un error
+        partRigth := normalized[min:]
+
+        for _, v := range partRigth </span><span class="cov8" title="1">{
+                if v != "" </span><span class="cov0" title="0">{
+                        return nil, errorCadena
+                }</span>
+        }
+        <span class="cov8" title="1">return normalized[:min], nil</span>
+}
+
+//Dado un conjunto de arrays de entrada, se colocan en un hashMap para ver si coinciden las posiciones y se determina el mensaje
+func mergeArrays(arrayMessages [][]string, min int) ([]string, error) <span class="cov8" title="1">{
+        //Se vuelcan datos de array a un hashMap , si algún caracter no coincide hay un error de superposición de strings diferentes
+        helper := make([]string, min)
+
+        for _, v := range arrayMessages </span><span class="cov8" title="1">{
+                for i, j := range v </span><span class="cov8" title="1">{
+                        if j != "" </span><span class="cov8" title="1">{
+                                //si cadena no es vacía, me fijo si helper ya tenia un valor, sino inserto valor en la posición
+                                if helper[i] == "" </span><span class="cov8" title="1">{
+                                        helper[i] = j
+                                }</span> else<span class="cov8" title="1"> {
+                                        if helper[i] != j </span><span class="cov8" title="1">{
+                                                return nil, errorCadena
+                                        }</span>
+                                }
+
+                        }
+                }
+        }
+
+        <span class="cov8" title="1">return helper, nil</span>
+}
+
+func getMessageProcesed(messages [][]string, min int) (string, error) <span class="cov8" title="1">{
+
+        //Se hace merge de los arrays de messages
+        helper, err := mergeArrays(messages, min)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">var msg string
+
+        //Verificar que en el merge no haya quedado ningún espacio vacío
+        for _, v := range helper </span><span class="cov8" title="1">{
+                if v == "" </span><span class="cov8" title="1">{
+                        if maxPhaseShift == 0 </span><span class="cov8" title="1">{
+                                return "", errorInfo
+                        }</span>
+                        <span class="cov8" title="1">helper = helper[1:]
+                        maxPhaseShift--</span>
+                }
+        }
+
+        <span class="cov8" title="1">for _, v := range helper </span><span class="cov8" title="1">{
+                msg += v + " "
+        }</span>
+
+        //Elimino el último espacio
+        <span class="cov8" title="1">substring := msg[:(len(msg) - 1)]
+
+        return substring, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package service
+
+import (
+        "errors"
+        "reflect"
+
+        "github.com/nicobianchetti/Meli-Quasar-NB/src/interfaces"
+        "github.com/nicobianchetti/Meli-Quasar-NB/src/model"
+)
+
+const (
+        sat1    = "kenobi"
+        sat2    = "skywalker"
+        sat3    = "sato"
+        cantSat = 3
+)
+
+var (
+        errorSatelliteInpunt = errors.New("Error en satélites ingresados")
+        errrCalculate        = errors.New("Error en obtención de coordenas de emisor")
+)
+
+type resultLocation struct {
+        x, y float64
+        err  error
+}
+
+type resultMessage struct {
+        message string
+        err     error
+}
+
+type satelliteService struct {
+        cache interfaces.ISatelliteCache
+}
+
+//NewSatelliteService .
+func NewSatelliteService(cache interfaces.ISatelliteCache) interfaces.ISatelliteService <span class="cov8" title="1">{
+        return &amp;satelliteService{cache}
+}</span>
+
+func (s *satelliteService) GetTransmitter(satellite *[]model.Satellite) (*model.DTOResult, error) <span class="cov8" title="1">{
+
+        //Controla que lleguen los 3 satélites
+
+        //Hashmap para controlar que de cada satéllite llegue un sólo dato
+        controlSatellite := make(map[string]int)
+        for _, v := range *satellite </span><span class="cov8" title="1">{
+                controlSatellite[v.Name]++
+
+                //Verificar que todas las distancias sean distintas de 0
+                if v.Distance == 0 </span><span class="cov8" title="1">{
+                        return nil, errorSatelliteInpunt
+                }</span>
+        }
+
+        <span class="cov8" title="1">for i, v := range controlSatellite </span><span class="cov8" title="1">{
+                if v != 1 || (i != sat1 &amp;&amp; i != sat2 &amp;&amp; i != sat3) </span><span class="cov8" title="1">{
+                        return nil, errorSatelliteInpunt
+                }</span>
+        }
+
+        //Verificar que efectivamente hayan llegado los 3 satélites
+        <span class="cov8" title="1">if len(controlSatellite) != cantSat </span><span class="cov0" title="0">{
+                return nil, errorSatelliteInpunt
+        }</span>
+
+        //------------------------------------------------------------------------------------------
+
+        //Si llegaron datos de los 3 satélites
+        <span class="cov8" title="1">var distances []model.DataDistances
+        var messages [][]string
+        chanLocation := make(chan resultLocation)
+        chanMessage := make(chan resultMessage)
+
+        for _, v := range *satellite </span><span class="cov8" title="1">{
+                distances = append(distances, model.DataDistances{Satellite: v.Name, Distance: v.Distance})
+                messages = append(messages, v.Message)
+        }</span>
+
+        <span class="cov8" title="1">go location(chanLocation, distances)
+        go message(chanMessage, messages)
+
+        var err error
+
+        //Lectura de chanel de Location
+        var result resultLocation
+        for u := range chanLocation </span><span class="cov8" title="1">{
+                result = resultLocation{x: u.x, y: u.y, err: u.err}
+        }</span>
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">position := model.NewPosition(result.x, result.y)
+
+        //Lectura chanel de Message
+        var message string
+        for m := range chanMessage </span><span class="cov8" title="1">{
+                message = m.message
+                err = m.err
+        }</span>
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return model.NewDTOResult(position, message), nil</span>
+
+        // //Sin uso de goroutines
+        // x, y := GetLocation(distances...)
+
+        // position := model.NewPosition(x, y)
+
+        // message, err := GetMessage(messages...)
+}
+
+func (s *satelliteService) RegisterKey(key string, satellite *model.Satellite) error <span class="cov0" title="0">{
+
+        satellites, err := s.cache.Get(key)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        //Si ya había una estructura de satélite guardada para el usuario, reviso para sobreescribir o agregar satélite nuevo
+        <span class="cov0" title="0">if satellites != nil </span><span class="cov0" title="0">{
+                var isExistSatellite bool = false
+                var indexExist int
+                var updateData bool = false
+
+                //Verifico, si ya existe , sobreescribo los datos y reemplazo la key
+                for i, v := range satellites.Satellites </span><span class="cov0" title="0">{
+                        if v.Name == satellite.Name </span><span class="cov0" title="0">{
+                                isExistSatellite = true
+                                if !reflect.DeepEqual(v.Message, satellite.Message) || v.Distance != satellite.Distance </span><span class="cov0" title="0">{
+                                        updateData = true
+                                }</span>
+                                <span class="cov0" title="0">indexExist = i
+                                break</span>
+                        }
+                }
+
+                //Si satélite nuevo no existía , apependeo a estructura
+                <span class="cov0" title="0">if !isExistSatellite </span><span class="cov0" title="0">{
+                        satellites.Satellites = append(satellites.Satellites, *satellite)
+                }</span> else<span class="cov0" title="0"> {
+                        //Si ya existe, y además vino un dato distino,lo modifico con los datos nuevos
+                        if updateData </span><span class="cov0" title="0">{
+                                satellites.Satellites[indexExist].Distance = satellite.Distance
+                                satellites.Satellites[indexExist].Message = satellite.Message
+                        }</span>
+                }
+
+                <span class="cov0" title="0">err := s.cache.Delete(key)
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov0" title="0">err = s.cache.Set(key, satellites)
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov0" title="0">return nil</span>
+        }
+
+        //Si la estructura no existe , agrego a la base estructura nueva asociada a key(user)
+        <span class="cov0" title="0">newSatellites := model.DTORequestSatellites{}
+
+        newSatellites.Satellites = append(newSatellites.Satellites, *satellite)
+
+        err = s.cache.Set(key, &amp;newSatellites)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+
+}
+
+func (s *satelliteService) GetSatellites(key string) (*model.DTORequestSatellites, error) <span class="cov0" title="0">{
+
+        satellites, err := s.cache.Get(key)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">if satellites == nil </span><span class="cov0" title="0">{
+                err := errors.New("No hay información suficiente")
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return satellites, nil</span>
+}
+
+func (s *satelliteService) DeleteKey(key string) error <span class="cov0" title="0">{
+
+        err := s.cache.Delete(key)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package service
+
+import (
+        "errors"
+        "math"
+
+        "github.com/nicobianchetti/Meli-Quasar-NB/src/model"
+)
+
+//Trilateration .
+func Trilateration(c1, c2, c3 model.Cordinate) (x, y float64, err error) <span class="cov8" title="1">{
+
+        d1, d2, d3, i1, i2, i3, j1, j2, j3 := &amp;c1.D, &amp;c2.D, &amp;c3.D, &amp;c1.X, &amp;c2.X, &amp;c3.X, &amp;c1.Y, &amp;c2.Y, &amp;c3.Y
+
+        denom1 := ((2**i2-2**i3)*(2**j2-2**j1) - (2**i1-2**i2)*(2**j3-2**j2))
+        denom2 := (2**j2 - 2**j1)
+
+        //Me aseguro de no generar ninguna división por 0
+        if denom1 != 0 &amp;&amp; denom2 != 0 </span><span class="cov8" title="1">{
+                x = ((((math.Pow(*d1, 2)-math.Pow(*d2, 2))+(math.Pow(*i2, 2)-math.Pow(*i1, 2))+(math.Pow(*j2, 2)-math.Pow(*j1, 2)))*(2**j3-2**j2) - ((math.Pow(*d2, 2)-math.Pow(*d3, 2))+(math.Pow(*i3, 2)-math.Pow(*i2, 2))+(math.Pow(*j3, 2)-math.Pow(*j2, 2)))*(2**j2-2**j1)) / denom1)
+
+                y = ((math.Pow(*d1, 2) - math.Pow(*d2, 2)) + (math.Pow(*i2, 2) - math.Pow(*i1, 2)) + (math.Pow(*j2, 2) - math.Pow(*j1, 2)) + x*(2**i1-2**i2)) / denom2
+
+                return x, y, nil
+        }</span>
+
+        <span class="cov0" title="0">return 0, 0, errors.New("Error en obtención de coordenas de emisor")</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

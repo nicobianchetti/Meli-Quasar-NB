@@ -15,18 +15,16 @@ func location(location chan resultLocation, distances []model.DataDistances) {
 
 	defer close(location)
 
-	// time.Sleep(4 * time.Second)
+	x, y, err := getLocation(distances...)
 
-	x, y := getLocation(distances...)
-
-	location <- resultLocation{x: x, y: y}
+	location <- resultLocation{x: x, y: y, err: err}
 
 }
 
 //GetLocation .
 // input: distancia al emisor tal cual se recibe en cada satélite
 // output: las coordenadas ‘x’ e ‘y’ del emisor del mensaje
-func getLocation(distances ...model.DataDistances) (x, y float64) {
+func getLocation(distances ...model.DataDistances) (x, y float64, err error) {
 
 	var c1, c2, c3 model.Cordinate
 
